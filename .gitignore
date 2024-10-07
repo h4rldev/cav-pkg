@@ -1,3 +1,4 @@
-/build/out
-/build/bin
-/cav
+build/out
+build/bin
+build/lib
+cav
