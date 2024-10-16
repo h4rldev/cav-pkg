@@ -43,7 +43,7 @@ static int get_arg_int_level(int *argc, char **argv[], enum Level level) {
     int arg_int = 0;
     
     char *arg_to_scan = *(*argv + level + 1);
-    printf("arg_to_scan: %s\n", arg_to_scan);
+    //printf("arg_to_scan: %s\n", arg_to_scan);
     
     char *level1_args[] = {
 	"--help",    "-h",            // 0 - NOTE: This doesn't have a subflag
@@ -112,10 +112,10 @@ static int print_help(void) {
     "        -v, --verbose              Show extra info during command execution.\n"
     "        -y, --noconfirm            Accepts all prompts for removal.\n"
     "        -r, --recursive            Removes dependencies recursively.\n"
-    "         ↳  -y, --noconfirm            Accept all prompts for upgrade of all packages.\n"
+    "         ↳  -y, --noconfirm            Accept all prompts for removal.\n"
     "            -v, --verbose              Show extra info during command execution.\n"
     "        -c, --cached               Clears cache for package.\n"
-    "         ↳  -y, --noconfirm            Accept all prompts for upgrade of all packages.\n"
+    "         ↳  -y, --noconfirm            Accept all prompts for removal.\n"
     "            -v, --verbose              Show extra info during command execution.\n\n"
 
     "© h4rl & Malwarepad, 2024\n"
@@ -185,19 +185,16 @@ int process_args(int *argc, char **argv[]) {
     int local_argc = *argc;
     char **local_argv = *argv;
     
-    // 3 to indicate possible flag levels, stack allocated as it doesn't need the heap, filled with 0s to avoid undefined behavior
+    // 3 to indicate possible flag level
     int arg_ints[3] = {0};
     int program_result = 0;
-
-    // TODO: figure out how to check between packages and flags
 
     int argi = 0;
     int arg_count = 1;
 
-    
     for (int argi = 0; argi != 3; argi++) {
 	int arg_int = get_arg_int_level(&local_argc, &local_argv, argi);
-	printf("Arg int: %d\n", arg_int);
+//	printf("Arg int: %d\n", arg_int);
 	arg_ints[argi] = arg_int;
     } 
 

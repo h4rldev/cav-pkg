@@ -13,6 +13,7 @@ pkgs.mkShell {
     cbfmt
     mdformat
     beautysh
+    curl
     shfmt
     uncrustify
     tree-sitter-grammars.tree-sitter-c

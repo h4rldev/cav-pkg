@@ -38,7 +38,7 @@
 # Made with <3 by tatsoku-org!
 
 shopt -s nullglob # remove words if not found
-# set -x # show cmds
+set -x # show cmds
 set -e # fail globally
 
 __NAME__="cav: build.sh"
@@ -47,13 +47,24 @@ __DESCRIPTION__="Compiles libcav and cav into an executable, or just libcav into
 __LICENSE__="BSD 3-Clause License"
 __VERSION__="0.1.0"
 
+
+# name projs by their directories
+# and specify type :3
+
 PROJS=("libcav" "cav")
+TYPES=("lib" "bin")
+
+# ignore
 SRCS=()
 DIRS=()
 
 for proj_i in "${!PROJS[@]}"; do
     SRCS[$proj_i]="$(pwd)/${PROJS[$proj_i]}/src"
-    DIRS[$proj_i]="${SRCS[$proj_i]}/${PROJS[$proj_i]##*/}"
+    if [[ ${TYPES[$proj_i]} != "lib" ]]; then
+	DIRS[$proj_i]="${SRCS[$proj_i]}/${PROJS[$proj_i]##*/}"
+    else
+	DIRS[$proj_i]="none"
+    fi
 done
 
 BUILD="$(pwd)/build"
@@ -81,7 +92,7 @@ if ${COLOR}; then
 fi
 
 CFLAGS="-O3"
-#LINKER_FLAGS=""
+LINKER_FLAGS="-lcurl"
 
 if [[ ${3} == "--debug" ]]; then
     CFLAGS="${CFLAGS} -gddb"
@@ -145,9 +156,15 @@ compile_all() {
     for DIR_I in "${!DIRS[@]}"; do
 	DIR="${DIRS[$DIR_I]}"
 	SRC="${SRCS[$DIR_I]}"
-
-	mapfile -t C_FILES < <(find "${DIR}" -type f -name "*.c")
-
+	
+	if [[ ${DIR} != "none" ]]; then
+	    echo -e "$DIR != none"
+	    mapfile -t C_FILES < <(find "${DIR}" -type f -name "*.c")
+	else
+	    echo -e "$DIR == none"
+	    mapfile -t C_FILES < <(find "${SRC}" -type f -name "*.c")
+	fi
+	
 	for ((i = 0; i < ${#C_FILES[@]}; i++)); do
             TRIMMED_C_FILE="${C_FILES[${i}]%.*}"
             TRIMMED_C_FILENAME="${TRIMMED_C_FILE##*/}"
@@ -165,11 +182,21 @@ compile_all() {
             fi
 	done
 	
-	echo -e "${BLUE}>${CLEAR} Compiling: main.c.."
-	"${CC}" ${CFLAGS} -c "${SRC}/main.c" -o "${OUT}/main.o"
-
-	echo -e "${GREEN}✓${CLEAR} Compiled ${CYAN}${TRIMMED_C_FILENAMES[*]}${CLEAR} & ${CYAN}main${CLEAR} successfully"
+	if [[ ${DIR} != "none" ]]; then
+	    echo -e "${BLUE}>${CLEAR} Compiling: main.c.."
+	    "${CC}" ${CFLAGS} -c "${SRC}/main.c" -o "${OUT}/main.o"
+	    
+	    echo -e "${GREEN}✓${CLEAR} Compiled ${CYAN}${TRIMMED_C_FILENAMES[*]}${CLEAR} & ${CYAN}main${CLEAR} successfully"
+	else
+	    echo -e "${GREEN}✓${CLEAR} Compiled ${CYAN}${TRIMMED_C_FILENAMES[*]}${CLEAR} successfully"
+	fi
+	
 	unset DIR
+	unset C_FILES
+	unset TRIMMED_C_FILE
+	unset TRIMMED_C_FILES
+	unset TRIMMED_C_FILES
+	unset TRIMMED_C_FILENAMES
 	unset SRC
     done
 }
@@ -188,6 +215,7 @@ compile() {
 
     local DIR
     local SRC
+    local INDEX
 
     local TARGET
 
@@ -199,25 +227,31 @@ compile() {
 
     case $TARGET in
 	"libcav")
-	    DIR="${DIRS[0]}"
-	    SRC="${SRCS[0]}"
-	    clean_dangling "${DIRS[0]}" "${OUT}"
+	    INDEX=0
+	    clean_dangling "${SRCS[$INDEX]}" "${OUT}"
 	;;
 	"cav")
-	    DIR="${DIRS[1]}"
-	    SRC="${SRCS[1]}"
-	    clean_dangling "${DIRS[1]}" "${OUT}"
+	    INDEX=1
+	    clean_dangling "${DIRS[$INDEX]}" "${OUT}"
 	;;
 	"both" | "all" | *)
 	    compile_all
-	    clean_dangling "${DIRS[0]}" "${DIRS[1]}" "${OUT}"
+	    clean_dangling "${SRCS[0]}" "${DIRS[1]}" "${OUT}"
 	    exit 0
 	    ;;
     esac
+
+    DIR="${DIRS[$INDEX]}"
+    SRC="${SRCS[$INDEX]}"
     
-
-    mapfile -t C_FILES < <(find "${DIR}" -type f -name "*.c")
-
+    
+    if [[ ${TYPE} != "lib" ]]; then
+       mapfile -t C_FILES < <(find "${DIR}" -type f -name "*.c")       
+    else
+       mapfile -t C_FILES < <(find "${SRC}" -type f -name "*.c")
+    fi
+       
+       
     for ((i = 0; i < ${#C_FILES[@]}; i++)); do
         TRIMMED_C_FILE="${C_FILES[${i}]%.*}"
         TRIMMED_C_FILENAME="${TRIMMED_C_FILE##*/}"
@@ -234,11 +268,21 @@ compile() {
             "${CC}" ${CFLAGS} -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
         fi
     done
-    
-    echo -e "${BLUE}>${CLEAR} Compiling: main.c.."
-    "${CC}" ${CFLAGS} -c "${SRC}/main.c" -o "${OUT}/main.o"
 
-    echo -e "${GREEN}✓${CLEAR} Compiled ${CYAN}${TRIMMED_C_FILENAMES[*]}${CLEAR} & ${CYAN}main${CLEAR} successfully"
+    if [[ ${TYPE} != "lib" ]]; then
+	echo -e "${BLUE}>${CLEAR} Compiling: main.c.."
+	"${CC}" ${CFLAGS} -c "${SRC}/main.c" -o "${OUT}/main.o"
+
+	echo -e "${GREEN}✓${CLEAR} Compiled ${CYAN}${TRIMMED_C_FILENAMES[*]}${CLEAR} & ${CYAN}main${CLEAR} successfully"
+    else
+	echo -e "${GREEN}✓${CLEAR} Compiled ${CYAN}${TRIMMED_C_FILENAMES[*]}${CLEAR} successfully"
+    fi
+
+    unset C_FILES
+    unset TRIMMED_C_FILE
+    unset TRIMMED_C_FILENAME
+    unset TRIMMED_C_FILES
+    unset TRILLED_C_FILENAMES
     unset DIR
     unset SRC
 }
