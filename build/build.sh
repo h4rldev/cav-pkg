@@ -7,7 +7,7 @@
 # Licensed under the:
 # BSD 3-Clause License
 #
-# Copyright (c) 2024, tatsoku
+# Copyright (c) 2024, h4rl
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -35,7 +35,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 #
-# Made with <3 by tatsoku-org!
+# Made with <3 by h4rl!
 
 shopt -s nullglob # remove words if not found
 # set -x # show cmds
@@ -46,7 +46,6 @@ __AUTHOR__="h4rl"
 __DESCRIPTION__="Compiles libcav and cav into an executable, or just libcav into a static library"
 __LICENSE__="BSD 3-Clause License"
 __VERSION__="0.1.0"
-
 
 # name projs by their directories
 # and specify type :3
@@ -59,12 +58,12 @@ SRCS=()
 DIRS=()
 
 for proj_i in "${!PROJS[@]}"; do
-    SRCS[$proj_i]="$(pwd)/${PROJS[$proj_i]}/src"
-    if [[ ${TYPES[$proj_i]} != "lib" ]]; then
-	DIRS[$proj_i]="${SRCS[$proj_i]}/${PROJS[$proj_i]##*/}"
-    else
-	DIRS[$proj_i]="none"
-    fi
+	SRCS[$proj_i]="$(pwd)/${PROJS[$proj_i]}/src"
+	if [[ ${TYPES[$proj_i]} != "lib" ]]; then
+		DIRS[$proj_i]="${SRCS[$proj_i]}/${PROJS[$proj_i]##*/}"
+	else
+		DIRS[$proj_i]="none"
+	fi
 done
 
 BUILD="$(pwd)/build"
@@ -82,43 +81,43 @@ COLOR=true
 CC="gcc"
 
 if ${COLOR}; then
-    ESCAPE=$(printf "\e")
-    RED="${ESCAPE}[0;31m"
-    GREEN="${ESCAPE}[0;32m"
-    YELLOW="${ESCAPE}[1;33m"
-    BLUE="${ESCAPE}[0;34m"
-    CYAN="${ESCAPE}[0;36m"
-    CLEAR="${ESCAPE}[0m"
+	ESCAPE=$(printf "\e")
+	RED="${ESCAPE}[0;31m"
+	GREEN="${ESCAPE}[0;32m"
+	YELLOW="${ESCAPE}[1;33m"
+	BLUE="${ESCAPE}[0;34m"
+	CYAN="${ESCAPE}[0;36m"
+	CLEAR="${ESCAPE}[0m"
 fi
 
 CFLAGS="-O3"
 LINKER_FLAGS="-lcurl"
 
 if [[ ${3} == "--debug" ]]; then
-    CFLAGS="${CFLAGS} -gddb"
+	CFLAGS="${CFLAGS} -gddb"
 fi
 
 handle_failure() {
-    local MESSAGE="${1}"
+	local MESSAGE="${1}"
 
-    if [[ -z ${MESSAGE} ]]; then
-    echo "No message provided, are you using this right?"
-    exit 1
-    fi
+	if [[ -z ${MESSAGE} ]]; then
+		echo "No message provided, are you using this right?"
+		exit 1
+	fi
 
-    echo "${RED}!${CLEAR} ${MESSAGE}${CLEAR}"
-    exit 1
+	echo "${RED}!${CLEAR} ${MESSAGE}${CLEAR}"
+	exit 1
 }
 
 print_help() {
-    # ${RED}-st${CLEAR} | ${RED}--setup-testing${CLEAR}
-    # Sets up and installs unity in the correct path.
-    # (Automatically runs if not already installed during --test)
+	# ${RED}-st${CLEAR} | ${RED}--setup-testing${CLEAR}
+	# Sets up and installs unity in the correct path.
+	# (Automatically runs if not already installed during --test)
 
-    # ${RED}-t${CLEAR} | ${RED}--test${CLEAR}
-    # Runs unit tests in ${TEST}
+	# ${RED}-t${CLEAR} | ${RED}--test${CLEAR}
+	# Runs unit tests in ${TEST}
 
-    cat <<EOF
+	cat <<EOF
 ${RED}${__NAME__}${CLEAR} v${GREEN}${__VERSION__}${CLEAR}
 Licensed under: ${CYAN}${__LICENSE__}${CLEAR}
 
@@ -140,236 +139,234 @@ EOF
 }
 
 compile_all() {
-    local -a C_FILES
+	local -a C_FILES
 
-    local -a TRIMMED_C_FILES
-    local -a TRIMMED_C_FILENAMES
+	local -a TRIMMED_C_FILES
+	local -a TRIMMED_C_FILENAMES
 
-    local RECOMPILE
-    local TRIMMED_C_FILE
-    local TRINNED_C_FILENAME
+	local RECOMPILE
+	local TRIMMED_C_FILE
+	local TRINNED_C_FILENAME
 
-    local DIR
-    local DIR_I
-    local SRC
+	local DIR
+	local DIR_I
+	local SRC
 
-    for DIR_I in "${!DIRS[@]}"; do
-	DIR="${DIRS[$DIR_I]}"
-	SRC="${SRCS[$DIR_I]}"
-	
-	if [[ ${DIR} != "none" ]]; then
-	    mapfile -t C_FILES < <(find "${DIR}" -type f -name "*.c")
-	else
-	    mapfile -t C_FILES < <(find "${SRC}" -type f -name "*.c")
-	fi
-	
-	for ((i = 0; i < ${#C_FILES[@]}; i++)); do
-            TRIMMED_C_FILE="${C_FILES[${i}]%.*}"
-            TRIMMED_C_FILENAME="${TRIMMED_C_FILE##*/}"
-            TRIMMED_C_FILES+=("${TRIMMED_C_FILE}")
-            TRIMMED_C_FILENAMES+=("${TRIMMED_C_FILENAME}")
-            echo -e "${BLUE}>${CLEAR} Compiling: ${CYAN}${C_FILES[${i}]}${CLEAR}.."
-            if [[ -f "${OUT}/${TRIMMED_C_FILENAME}.o" ]]; then
-		echo -ne "${YELLOW}!${CLEAR} ${CYAN}${TRIMMED_C_FILENAME}.o${CLEAR} seems to already exist, you wanna recompile it? [${GREEN}Y${CLEAR}/${RED}n${CLEAR}]: "
-		read -r RECOMPILE
-		if [[ ! ${RECOMPILE} =~ [Nn] ]]; then
-		    "${CC}" ${CFLAGS} -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
+	for DIR_I in "${!DIRS[@]}"; do
+		DIR="${DIRS[$DIR_I]}"
+		SRC="${SRCS[$DIR_I]}"
+
+		if [[ ${DIR} != "none" ]]; then
+			mapfile -t C_FILES < <(find "${DIR}" -type f -name "*.c")
+		else
+			mapfile -t C_FILES < <(find "${SRC}" -type f -name "*.c")
 		fi
-            else
-		"${CC}" ${CFLAGS} -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
-            fi
+
+		for ((i = 0; i < ${#C_FILES[@]}; i++)); do
+			TRIMMED_C_FILE="${C_FILES[${i}]%.*}"
+			TRIMMED_C_FILENAME="${TRIMMED_C_FILE##*/}"
+			TRIMMED_C_FILES+=("${TRIMMED_C_FILE}")
+			TRIMMED_C_FILENAMES+=("${TRIMMED_C_FILENAME}")
+			echo -e "${BLUE}>${CLEAR} Compiling: ${CYAN}${C_FILES[${i}]}${CLEAR}.."
+			if [[ -f "${OUT}/${TRIMMED_C_FILENAME}.o" ]]; then
+				echo -ne "${YELLOW}!${CLEAR} ${CYAN}${TRIMMED_C_FILENAME}.o${CLEAR} seems to already exist, you wanna recompile it? [${GREEN}Y${CLEAR}/${RED}n${CLEAR}]: "
+				read -r RECOMPILE
+				if [[ ! ${RECOMPILE} =~ [Nn] ]]; then
+					"${CC}" ${CFLAGS} -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
+				fi
+			else
+				"${CC}" ${CFLAGS} -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
+			fi
+		done
+
+		if [[ ${DIR} != "none" ]]; then
+			echo -e "${BLUE}>${CLEAR} Compiling: main.c.."
+			"${CC}" ${CFLAGS} -c "${SRC}/main.c" -o "${OUT}/main.o"
+
+			echo -e "${GREEN}✓${CLEAR} Compiled ${CYAN}${TRIMMED_C_FILENAMES[*]}${CLEAR} & ${CYAN}main${CLEAR} successfully"
+		else
+			echo -e "${GREEN}✓${CLEAR} Compiled ${CYAN}${TRIMMED_C_FILENAMES[*]}${CLEAR} successfully"
+		fi
+
+		unset DIR
+		unset C_FILES
+		unset TRIMMED_C_FILE
+		unset TRIMMED_C_FILES
+		unset TRIMMED_C_FILES
+		unset TRIMMED_C_FILENAMES
+		unset SRC
 	done
-	
-	if [[ ${DIR} != "none" ]]; then
-	    echo -e "${BLUE}>${CLEAR} Compiling: main.c.."
-	    "${CC}" ${CFLAGS} -c "${SRC}/main.c" -o "${OUT}/main.o"
-	    
-	    echo -e "${GREEN}✓${CLEAR} Compiled ${CYAN}${TRIMMED_C_FILENAMES[*]}${CLEAR} & ${CYAN}main${CLEAR} successfully"
-	else
-	    echo -e "${GREEN}✓${CLEAR} Compiled ${CYAN}${TRIMMED_C_FILENAMES[*]}${CLEAR} successfully"
-	fi
-	
-	unset DIR
-	unset C_FILES
-	unset TRIMMED_C_FILE
-	unset TRIMMED_C_FILES
-	unset TRIMMED_C_FILES
-	unset TRIMMED_C_FILENAMES
-	unset SRC
-    done
 }
 
 # iterates and compiles each file on selected target, then compiles main.c, moving them to out
 
 compile() {
-    local -a C_FILES
+	local -a C_FILES
 
-    local -a TRIMMED_C_FILES
-    local -a TRIMMED_C_FILENAMES
+	local -a TRIMMED_C_FILES
+	local -a TRIMMED_C_FILENAMES
 
-    local RECOMPILE
-    local TRIMMED_C_FILE
-    local TRIMMED_C_FILENAME
+	local RECOMPILE
+	local TRIMMED_C_FILE
+	local TRIMMED_C_FILENAME
 
-    local DIR
-    local SRC
-    local INDEX
+	local DIR
+	local SRC
+	local INDEX
 
-    local TARGET
+	local TARGET
 
-    TARGET=${1}
-    
-    if [[ ! -d ${OUT} ]]; then
-	mkdir "${OUT}"
-    fi
+	TARGET=${1}
 
-    case $TARGET in
+	if [[ ! -d ${OUT} ]]; then
+		mkdir "${OUT}"
+	fi
+
+	case $TARGET in
 	"libcav")
-	    INDEX=0
-	    clean_dangling "${SRCS[$INDEX]}" "${OUT}"
-	;;
+		INDEX=0
+		clean_dangling "${SRCS[$INDEX]}" "${OUT}"
+		;;
 	"cav")
-	    INDEX=1
-	    clean_dangling "${DIRS[$INDEX]}" "${OUT}"
-	;;
+		INDEX=1
+		clean_dangling "${DIRS[$INDEX]}" "${OUT}"
+		;;
 	"both" | "all" | *)
-	    compile_all
-	    clean_dangling "${SRCS[0]}" "${DIRS[1]}" "${OUT}"
-	    exit 0
-	    ;;
-    esac
+		compile_all
+		clean_dangling "${SRCS[0]}" "${DIRS[1]}" "${OUT}"
+		exit 0
+		;;
+	esac
 
-    DIR="${DIRS[$INDEX]}"
-    SRC="${SRCS[$INDEX]}"
-    
-    
-    if [[ ${TYPE} != "lib" ]]; then
-       mapfile -t C_FILES < <(find "${DIR}" -type f -name "*.c")       
-    else
-       mapfile -t C_FILES < <(find "${SRC}" -type f -name "*.c")
-    fi
-       
-       
-    for ((i = 0; i < ${#C_FILES[@]}; i++)); do
-        TRIMMED_C_FILE="${C_FILES[${i}]%.*}"
-        TRIMMED_C_FILENAME="${TRIMMED_C_FILE##*/}"
-        TRIMMED_C_FILES+=("${TRIMMED_C_FILE}")
-        TRIMMED_C_FILENAMES+=("${TRIMMED_C_FILENAME}")
-        echo -e "${BLUE}>${CLEAR} Compiling: ${CYAN}${C_FILES[${i}]}${CLEAR}.."
-        if [[ -f "${OUT}/${TRIMMED_C_FILENAME}.o" ]]; then
-	    echo -ne "${YELLOW}!${CLEAR} ${CYAN}${TRIMMED_C_FILENAME}.o${CLEAR} seems to already exist, you wanna recompile it? [${GREEN}Y${CLEAR}/${RED}n${CLEAR}]: "
-	    read -r RECOMPILE
-	    if [[ ! ${RECOMPILE} =~ [Nn] ]]; then
-		"${CC}" ${CFLAGS} -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
-	    fi
-        else
-            "${CC}" ${CFLAGS} -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
-        fi
-    done
+	DIR="${DIRS[$INDEX]}"
+	SRC="${SRCS[$INDEX]}"
 
-    if [[ ${TYPE} != "lib" ]]; then
-	echo -e "${BLUE}>${CLEAR} Compiling: main.c.."
-	"${CC}" ${CFLAGS} -c "${SRC}/main.c" -o "${OUT}/main.o"
+	if [[ ${TYPE} != "lib" ]]; then
+		mapfile -t C_FILES < <(find "${DIR}" -type f -name "*.c")
+	else
+		mapfile -t C_FILES < <(find "${SRC}" -type f -name "*.c")
+	fi
 
-	echo -e "${GREEN}✓${CLEAR} Compiled ${CYAN}${TRIMMED_C_FILENAMES[*]}${CLEAR} & ${CYAN}main${CLEAR} successfully"
-    else
-	echo -e "${GREEN}✓${CLEAR} Compiled ${CYAN}${TRIMMED_C_FILENAMES[*]}${CLEAR} successfully"
-    fi
+	for ((i = 0; i < ${#C_FILES[@]}; i++)); do
+		TRIMMED_C_FILE="${C_FILES[${i}]%.*}"
+		TRIMMED_C_FILENAME="${TRIMMED_C_FILE##*/}"
+		TRIMMED_C_FILES+=("${TRIMMED_C_FILE}")
+		TRIMMED_C_FILENAMES+=("${TRIMMED_C_FILENAME}")
+		echo -e "${BLUE}>${CLEAR} Compiling: ${CYAN}${C_FILES[${i}]}${CLEAR}.."
+		if [[ -f "${OUT}/${TRIMMED_C_FILENAME}.o" ]]; then
+			echo -ne "${YELLOW}!${CLEAR} ${CYAN}${TRIMMED_C_FILENAME}.o${CLEAR} seems to already exist, you wanna recompile it? [${GREEN}Y${CLEAR}/${RED}n${CLEAR}]: "
+			read -r RECOMPILE
+			if [[ ! ${RECOMPILE} =~ [Nn] ]]; then
+				"${CC}" ${CFLAGS} -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
+			fi
+		else
+			"${CC}" ${CFLAGS} -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
+		fi
+	done
 
-    unset C_FILES
-    unset TRIMMED_C_FILE
-    unset TRIMMED_C_FILENAME
-    unset TRIMMED_C_FILES
-    unset TRILLED_C_FILENAMES
-    unset DIR
-    unset SRC
+	if [[ ${TYPE} != "lib" ]]; then
+		echo -e "${BLUE}>${CLEAR} Compiling: main.c.."
+		"${CC}" ${CFLAGS} -c "${SRC}/main.c" -o "${OUT}/main.o"
+
+		echo -e "${GREEN}✓${CLEAR} Compiled ${CYAN}${TRIMMED_C_FILENAMES[*]}${CLEAR} & ${CYAN}main${CLEAR} successfully"
+	else
+		echo -e "${GREEN}✓${CLEAR} Compiled ${CYAN}${TRIMMED_C_FILENAMES[*]}${CLEAR} successfully"
+	fi
+
+	unset C_FILES
+	unset TRIMMED_C_FILE
+	unset TRIMMED_C_FILENAME
+	unset TRIMMED_C_FILES
+	unset TRILLED_C_FILENAMES
+	unset DIR
+	unset SRC
 }
 
 # links all object files in out/ to an executable bin or a library in lib
 
 link() {
-    local REDO
-    local -a OBJECTS
-    local EXECUTABLE_NAME
-    local -a TRIMMED_FILES
+	local REDO
+	local -a OBJECTS
+	local EXECUTABLE_NAME
+	local -a TRIMMED_FILES
 
-    local PACKAGING_TYPE
-    
-    PACKAGING_TYPE=${1}
+	local PACKAGING_TYPE
 
-    if [ -z "$PACKAGING_TYPE" ]; then
-	echo -e "${RED}!${CLEAR} Invalid usage! specify packaging type, options being \"bin\" or \"lib\""
-	exit 1
-    fi
+	PACKAGING_TYPE=${1}
 
-    if [[ ! -d ${BIN} ]]; then
-        mkdir "${BIN}"
-    fi
+	if [ -z "$PACKAGING_TYPE" ]; then
+		echo -e "${RED}!${CLEAR} Invalid usage! specify packaging type, options being \"bin\" or \"lib\""
+		exit 1
+	fi
 
-    if [[ ! -d ${LIB} ]]; then
-	mkdir "${LIB}"
-    fi
-   
-    mapfile -t OBJECTS < <(find "${OUT}" -type f -name "*.o")
+	if [[ ! -d ${BIN} ]]; then
+		mkdir "${BIN}"
+	fi
 
-    TRIMMED_FILES="${OBJECTS[*]##*/}"
-    pushd "${OUT}" >/dev/null || handle_failure "Failed to pushd" #|| echo "Failed to pushd" && exit 1
+	if [[ ! -d ${LIB} ]]; then
+		mkdir "${LIB}"
+	fi
 
-    if [[ -n ${2} ]]; then
-        NAME="${2}"
-    else
+	mapfile -t OBJECTS < <(find "${OUT}" -type f -name "*.o")
+
+	TRIMMED_FILES="${OBJECTS[*]##*/}"
+	pushd "${OUT}" >/dev/null || handle_failure "Failed to pushd" #|| echo "Failed to pushd" && exit 1
+
+	if [[ -n ${2} ]]; then
+		NAME="${2}"
+	else
+		case $PACKAGING_TYPE in
+		"lib")
+			NAME="${PROJS[0]}"
+			;;
+		"bin")
+			NAME="${PROJS[1]}"
+			;;
+		*)
+			echo -e "${RED}!${CLEAR} This place is impossible to reach, you got some miracle bash shell brother."
+			exit 1
+			;;
+		esac
+	fi
+
 	case $PACKAGING_TYPE in
-	    "lib")
-		NAME="${PROJS[0]}"
+	"lib")
+		echo -e "${BLUE}>${CLEAR} Archiving: ${CYAN}${TRIMMED_FILES[*]}${CLEAR}.."
+		if [[ -f "${LIB}/${NAME}.a" ]]; then
+			echo -ne "${YELLOW}!${CLEAR} ${CYAN}${NAME}.a${CLEAR} seems to already exist, you wanna rearchive it? [${GREEN}Y${CLEAR}/${RED}n${CLEAR}]: "
+			read -r REDO
+			if [[ ! ${REDO} =~ [Nn] ]]; then
+				ar rcs "${LIB}/${NAME}.a" ${TRIMMED_FILES[*]}
+				ranlib "${LIB}/${NAME}.a"
+				echo -e "${GREEN}✓${CLEAR} Archived ${CYAN}${TRIMMED_FILES}${CLEAR} to ${BLUE}${NAME}.a${CLEAR} successfully"
+			fi
+		else
+			ar rcs "${LIB}/${NAME}.a" ${TRIMMED_FILES[*]}
+			ranlib "${LIB}/${NAME}.a"
+			echo -e "${GREEN}✓${CLEAR} Archived ${CYAN}${TRIMMED_FILES}${CLEAR} to ${BLUE}${NAME}.a${CLEAR} successfully"
+		fi
 		;;
-	    "bin")
-		NAME="${PROJS[1]}"
+	"bin")
+		echo -e "${BLUE}>${CLEAR} Linking: ${CYAN}${TRIMMED_FILES[*]}${CLEAR}.."
+		if [[ -f "${BIN}/${NAME}" ]]; then
+			echo -ne "${YELLOW}!${CLEAR} ${CYAN}${NAME}${CLEAR} seems to already exist, you wanna relink it? [${GREEN}Y${CLEAR}/${RED}n${CLEAR}]: "
+			read -r REDO
+			if [[ ! ${REDO} =~ [Nn] ]]; then
+				"${CC}" ${CFLAGS} ${LINKER_FLAGS} -o "${BIN}/${NAME}" ${TRIMMED_FILES[*]}
+				echo -e "${GREEN}✓${CLEAR} Linked ${CYAN}${TRIMMED_FILES}${CLEAR} to ${BLUE}${NAME}${CLEAR} successfully"
+			fi
+		else
+			"${CC}" ${CFLAGS} ${LINKER_FLAGS} -o "${BIN}/${NAME}" ${TRIMMED_FILES[*]}
+			echo -e "${GREEN}✓${CLEAR} Linked ${CYAN}${TRIMMED_FILES}${CLEAR} to ${BLUE}${NAME}${CLEAR} successfully"
+		fi
 		;;
-	    *)
+	*)
 		echo -e "${RED}!${CLEAR} This place is impossible to reach, you got some miracle bash shell brother."
 		exit 1
 		;;
 	esac
-    fi
 
-    case $PACKAGING_TYPE in
-	"lib")
- 	    echo -e "${BLUE}>${CLEAR} Archiving: ${CYAN}${TRIMMED_FILES[*]}${CLEAR}.."
-	    if [[ -f "${LIB}/${NAME}.a" ]]; then
-		echo -ne "${YELLOW}!${CLEAR} ${CYAN}${NAME}.a${CLEAR} seems to already exist, you wanna rearchive it? [${GREEN}Y${CLEAR}/${RED}n${CLEAR}]: "
-		read -r REDO
-		if [[ ! ${REDO} =~ [Nn] ]]; then
-		    ar rcs "${LIB}/${NAME}.a" ${TRIMMED_FILES[*]}
-		    ranlib "${LIB}/${NAME}.a"
-		    echo -e "${GREEN}✓${CLEAR} Archived ${CYAN}${TRIMMED_FILES}${CLEAR} to ${BLUE}${NAME}.a${CLEAR} successfully"
-		fi
-	    else
-		ar rcs "${LIB}/${NAME}.a" ${TRIMMED_FILES[*]}
-		ranlib "${LIB}/${NAME}.a"
-		echo -e "${GREEN}✓${CLEAR} Archived ${CYAN}${TRIMMED_FILES}${CLEAR} to ${BLUE}${NAME}.a${CLEAR} successfully"		    
-	    fi
-	    ;;
-	"bin")
-	    echo -e "${BLUE}>${CLEAR} Linking: ${CYAN}${TRIMMED_FILES[*]}${CLEAR}.."
-	    if [[ -f "${BIN}/${NAME}" ]]; then
-		echo -ne "${YELLOW}!${CLEAR} ${CYAN}${NAME}${CLEAR} seems to already exist, you wanna relink it? [${GREEN}Y${CLEAR}/${RED}n${CLEAR}]: "
-		read -r REDO
-		if [[ ! ${REDO} =~ [Nn] ]]; then
-		    "${CC}" ${CFLAGS} ${LINKER_FLAGS} -o "${BIN}/${NAME}" ${TRIMMED_FILES[*]}
-		    echo -e "${GREEN}✓${CLEAR} Linked ${CYAN}${TRIMMED_FILES}${CLEAR} to ${BLUE}${NAME}${CLEAR} successfully"
-		fi
-	    else
-		"${CC}" ${CFLAGS} ${LINKER_FLAGS} -o "${BIN}/${NAME}" ${TRIMMED_FILES[*]}
-		echo -e "${GREEN}✓${CLEAR} Linked ${CYAN}${TRIMMED_FILES}${CLEAR} to ${BLUE}${NAME}${CLEAR} successfully"
-	    fi
-	    ;;
-	*)
-	    echo -e "${RED}!${CLEAR} This place is impossible to reach, you got some miracle bash shell brother."
-	    exit 1
-	    ;;
-    esac
-    
-    popd >/dev/null || handle_failure "Failed to popd" # || echo "Failed to popd" && exit 1
+	popd >/dev/null || handle_failure "Failed to popd" # || echo "Failed to popd" && exit 1
 }
 
 #setup_unity() {
@@ -480,106 +477,106 @@ link() {
 # removes dangling object files that shouldn't be there, used to be required, not that much as of lately though.
 
 clean_dangling() {
-    local DIR1 # C-DIR 1
-    local DIR2 # C-DIR 2 / OUT-DIR
-    local DIR3 # OUT-DIR
+	local DIR1 # C-DIR 1
+	local DIR2 # C-DIR 2 / OUT-DIR
+	local DIR3 # OUT-DIR
 
-    local OUTPUTDIR
-    
-    local LINE
+	local OUTPUTDIR
 
-    DIR1=${1}
-    DIR2=${2}
-    DIR3=${3}
+	local LINE
 
-    # Extract .c and .o filenames without paths and store them in temporary files
-    
-    if [[ -z ${DIR3} ]]; then
-	find "$DIR1" -name "*.c" -exec basename {} \; >"c_files.txt"
-	find "$DIR2" -name "*.o" -exec basename {} \; >>"o_files.txt"
-	OUTPUTDIR="${DIR2}"
-    else
-	find "$DIR1" -name "*.c" -exec basename {} \; >"c_files.txt"
-	find "$DIR2" -name "*.c" -exec basename {} \; >>"c_files.txt"
-	find "$DIR3" -name "*.o" -exec basename {} \; >"o_files.txt"
-	OUTPUTDIR="${DIR3}"
-    fi
+	DIR1=${1}
+	DIR2=${2}
+	DIR3=${3}
 
-    echo "main.c" >>"c_files.txt"
+	# Extract .c and .o filenames without paths and store them in temporary files
 
-    # Compare the lists and find .o files in dir2 that do not have a corresponding .c file in dir1
-    grep -Fxv -f <(sed 's/\.c$/.o/' "c_files.txt") "o_files.txt" >"extra_o_files.txt" || true
+	if [[ -z ${DIR3} ]]; then
+		find "$DIR1" -name "*.c" -exec basename {} \; >"c_files.txt"
+		find "$DIR2" -name "*.o" -exec basename {} \; >>"o_files.txt"
+		OUTPUTDIR="${DIR2}"
+	else
+		find "$DIR1" -name "*.c" -exec basename {} \; >"c_files.txt"
+		find "$DIR2" -name "*.c" -exec basename {} \; >>"c_files.txt"
+		find "$DIR3" -name "*.o" -exec basename {} \; >"o_files.txt"
+		OUTPUTDIR="${DIR3}"
+	fi
 
-    # Remove extra .o files from dir2
-    while read -r LINE; do
-        rm -f "${OUTPUTDIR}/${LINE}"
-    done <"extra_o_files.txt"
+	echo "main.c" >>"c_files.txt"
 
-    # Cleanup
-    rm c_files.txt o_files.txt extra_o_files.txt
+	# Compare the lists and find .o files in dir2 that do not have a corresponding .c file in dir1
+	grep -Fxv -f <(sed 's/\.c$/.o/' "c_files.txt") "o_files.txt" >"extra_o_files.txt" || true
+
+	# Remove extra .o files from dir2
+	while read -r LINE; do
+		rm -f "${OUTPUTDIR}/${LINE}"
+	done <"extra_o_files.txt"
+
+	# Cleanup
+	rm c_files.txt o_files.txt extra_o_files.txt
 }
 
 # cleans both /out && /bin
- 
+
 clean() {
-    local CLEAN
-    local LOCALOUT
-    local LOCALBIN
-    local LOG
+	local CLEAN
+	local LOCALOUT
+	local LOCALBIN
+	local LOG
 
-    LOCALOUT=${1}
-    LOCALBIN=${2}
-    CONFIRMATION=${3}
-    LOG=${4:true}
+	LOCALOUT=${1}
+	LOCALBIN=${2}
+	CONFIRMATION=${3}
+	LOG=${4:true}
 
-    if ${LOG}; then
-        echo -e "${RED}!${CLEAR} Cleaning ${CYAN}${LOCALOUT}${CLEAR} & ${CYAN}${LOCALBIN}${CLEAR}."
-    fi
-    if ! [[ ${CONFIRMATION} =~ [yY] ]]; then
-        echo -ne "${RED}!${CLEAR} You sure you want to proceed? [${GREEN}y${CLEAR}/${RED}N${CLEAR}]: "
-        read -r CLEAN
-    else
-        CLEAN="y"
-    fi
-    if [[ ${CLEAN} =~ [Yy] ]]; then
-        rm -fr "${LOCALOUT:?}/*"
-        rm -fr "${LOCALBIN:?}/*"
-        if ${LOG}; then
-            echo -e "${GREEN}✓${CLEAR} Cleaned ${CYAN}${LOCALOUT}${CLEAR} & ${CYAN}${LOCALBIN}${CLEAR} successfully."
-        fi
-    else
-        echo -e "${GREEN}✓${CLEAR} Cancelled."
-    fi
+	if ${LOG}; then
+		echo -e "${RED}!${CLEAR} Cleaning ${CYAN}${LOCALOUT}${CLEAR} & ${CYAN}${LOCALBIN}${CLEAR}."
+	fi
+	if ! [[ ${CONFIRMATION} =~ [yY] ]]; then
+		echo -ne "${RED}!${CLEAR} You sure you want to proceed? [${GREEN}y${CLEAR}/${RED}N${CLEAR}]: "
+		read -r CLEAN
+	else
+		CLEAN="y"
+	fi
+	if [[ ${CLEAN} =~ [Yy] ]]; then
+		rm -fr "${LOCALOUT:?}/*"
+		rm -fr "${LOCALBIN:?}/*"
+		if ${LOG}; then
+			echo -e "${GREEN}✓${CLEAR} Cleaned ${CYAN}${LOCALOUT}${CLEAR} & ${CYAN}${LOCALBIN}${CLEAR} successfully."
+		fi
+	else
+		echo -e "${GREEN}✓${CLEAR} Cancelled."
+	fi
 }
 
 clear_vgcores() {
-    local -a FILES
-    local FILE
+	local -a FILES
+	local FILE
 
-    FILES=$(find "${PWD}" -type f -name "vgcore.*")
+	FILES=$(find "${PWD}" -type f -name "vgcore.*")
 
-    if [[ -z ${FILES} ]]; then
-    echo -e "${RED}!${CLEAR} No files found :("
-    return
-    fi
-    
-    for FILE in ${FILES}; do
-    if [[ -f ${FILE} ]]; then
-        rm "${FILE}"
-        echo -e "${GREEN}✓${CLEAR} Deleted file ${CYAN}\"${FILE}\"${CLEAR}"
-    else
-        echo -e "${RED}!${CLEAR} File does not exist :("
-    fi
-    done
+	if [[ -z ${FILES} ]]; then
+		echo -e "${RED}!${CLEAR} No files found :("
+		return
+	fi
+
+	for FILE in ${FILES}; do
+		if [[ -f ${FILE} ]]; then
+			rm "${FILE}"
+			echo -e "${GREEN}✓${CLEAR} Deleted file ${CYAN}\"${FILE}\"${CLEAR}"
+		else
+			echo -e "${RED}!${CLEAR} File does not exist :("
+		fi
+	done
 }
 
 case $1 in
 "-c" | "--compile")
-    compile "${2}"
-    ;;
+	compile "${2}"
+	;;
 "-l" | "--link")
-    link "${2}" "${3}"
-    ;;
+	link "${2}" "${3}"
+	;;
 #"-st" | "--setup-testing")
 #    setup_unity
 #    ;;
@@ -587,12 +584,12 @@ case $1 in
 #    unit_test
 #    ;;
 "-d" | "--delete" | "--clean")
-    clean "${OUT}" "${BIN}" "n"
-    ;;
+	clean "${OUT}" "${BIN}" "n"
+	;;
 "-vg" | "--delete-cores" | "--delete-vgcores" | "--clean-vgcores" | "--clean-cores")
-    clear_vgcores
-    ;;
+	clear_vgcores
+	;;
 "--help" | "-h" | "-?" | *)
-    print_help "${@}"
-    ;;
+	print_help "${@}"
+	;;
 esac
