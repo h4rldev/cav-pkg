@@ -38,7 +38,7 @@
 # Made with <3 by tatsoku-org!
 
 shopt -s nullglob # remove words if not found
-set -x # show cmds
+# set -x # show cmds
 set -e # fail globally
 
 __NAME__="cav: build.sh"
@@ -158,10 +158,8 @@ compile_all() {
 	SRC="${SRCS[$DIR_I]}"
 	
 	if [[ ${DIR} != "none" ]]; then
-	    echo -e "$DIR != none"
 	    mapfile -t C_FILES < <(find "${DIR}" -type f -name "*.c")
 	else
-	    echo -e "$DIR == none"
 	    mapfile -t C_FILES < <(find "${SRC}" -type f -name "*.c")
 	fi
 	

@@ -17,6 +17,7 @@ pkgs.mkShell {
     shfmt
     uncrustify
     tree-sitter-grammars.tree-sitter-c
+    gdb
   ];
   shellHook = ''
   '';

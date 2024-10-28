@@ -26,3 +26,6 @@ default:
   just compile --debug
   just link
   valgrind ./build/bin/cav {{args}}
+
+@clear_cores:
+  {{build_script}} -vg
