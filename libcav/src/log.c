@@ -1,8 +1,12 @@
 #include "../include/log.h"
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+char file_path[1024];
+bool file_logging;
 
 int cav_log(logLevels level, char *fmt, ...) {
   va_list args;
@@ -63,9 +67,37 @@ int cav_log(logLevels level, char *fmt, ...) {
   }
 
   va_start(args, fmt);
+
   if (level <= current_level)
     vfprintf(current_file, fmt_buf, args);
+
+  if (file_logging) {
+    FILE *file = fopen(file_path, "a+");
+    vfprintf(file, fmt_buf, args);
+    fclose(file);
+  }
+
   va_end(args);
 
+  return 0;
+}
+
+int cav_logtofile(char *file, bool on) {
+  char local_file_path[1024] = DEFAULT_PATH;
+
+  if (on) {
+    if (file_logging)
+      return -1;
+    file_logging = true;
+  } else {
+    file_logging = false;
+  }
+
+  if (file[0] != '\0' || file != NULL) {
+    cav_log(Debug, "Copying provided filepath to local_file_path");
+    strlcpy(local_file_path, file, 1024);
+  }
+
+  strlcpy(file_path, local_file_path, 1024);
   return 0;
 }
