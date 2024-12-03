@@ -20,5 +20,7 @@ pkgs.mkShell {
     gdb
   ];
   shellHook = ''
+    mkdir tmp || true
+    export TMPDIR=./tmp/
   '';
 }

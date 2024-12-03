@@ -1,9 +1,10 @@
-#include "../include/log.h"
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "../include/log.h"
 
 char file_path[1024];
 bool file_logging;
